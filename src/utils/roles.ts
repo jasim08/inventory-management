@@ -3,3 +3,4 @@ export enum Role{
     staffMember = 2,
     NormalUser = 3
 }
+

@@ -31,3 +31,18 @@ export type UpdateUserParams = {
         title :string;
         description: string;
     }
+
+    export type LoginParams = {
+        username: string;
+        password: string;
+    }
+
+    export type UpdateProfileparams = {
+            firstname : string;
+            lastname: string;
+            age: number;
+            dob:string;
+            additionalInfo: Record<string, any> | null;
+            role: Role
+            
+    }

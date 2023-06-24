@@ -45,7 +45,7 @@ export class User extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column()
+  @Column({default: false})
   isDeleted : boolean
 
 }

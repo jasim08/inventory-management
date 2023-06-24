@@ -8,11 +8,13 @@ import { UsersMiddleware } from './middleware/users/users.middleware';
 import { CrudHistory } from 'src/typeorm/entities/crudhistory';
 import { Products } from 'src/typeorm/entities/products';
 import { ProductCategory } from 'src/typeorm/entities/productcategory';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Profile,CrudHistory, Products, ProductCategory])],
   controllers: [UsersController],
-  providers: [UsersService]
+  providers: [UsersService,AuthGuard],
+  exports: [UsersService]
 })
 export class UsersModule implements NestModule{
   configure(consumer: MiddlewareConsumer){

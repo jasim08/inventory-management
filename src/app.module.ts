@@ -10,6 +10,7 @@ import { CrudHistory } from './typeorm/entities/crudhistory';
 import { Products } from './typeorm/entities/products';
 import { ProductCategory } from './typeorm/entities/productcategory';
 import { Role } from './typeorm/entities/roles';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
@@ -22,7 +23,7 @@ import { Role } from './typeorm/entities/roles';
     database: 'inventory_management',
     entities: [User, Profile,CrudHistory, Products, ProductCategory, Role],
     synchronize: true,
-  }), UsersModule],
+  }), UsersModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })

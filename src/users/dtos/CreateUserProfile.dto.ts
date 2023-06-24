@@ -1,5 +1,3 @@
-import { Role } from "src/utils/roles";
-
 export class CreateUserProfileDto{
 
     firstname : string;
@@ -7,6 +5,7 @@ export class CreateUserProfileDto{
     age: number;
     dob:string;
     additionalInfo: JSON;
-    role: Role
+    
 
 }
+

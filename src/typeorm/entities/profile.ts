@@ -22,7 +22,7 @@ export class Profile {
     @Column()
     dob: string;
 
-    @Column({ type: 'json', nullable: true })
+    @Column({type: "json", nullable: true })
     additionalInfo: Record<string, any>
   
     @Column()
