@@ -1,11 +1,10 @@
 import { Body, Controller ,Get , Post, Put, Delete, Param, ParseIntPipe, UsePipes, ValidationPipe, Req} from '@nestjs/common';
 import { Request } from 'express';
-import { CreatePostDto } from 'src/users/dtos/CreatePost.dto';
 import { CreatUserDto } from 'src/users/dtos/CreateUser.dto';
 import { CreateUserProfileDto } from 'src/users/dtos/CreateUserProfile.dto';
 import { UpdateUserDto } from 'src/users/dtos/UpdateUser.dto';
 import { UsersService } from 'src/users/services/users/users.service';
-import { Role } from 'src/utils/roles';
+
 
 @Controller('user')
 export class UsersController {
@@ -47,9 +46,6 @@ export class UsersController {
     }
 
 
-    @Post(':id/post')
-    createPost(@Param("id", ParseIntPipe) id: number, @Body() createPostDto: CreatePostDto){
-        return this.userService.createPost(id, createPostDto);
-    }
+   
 
 }

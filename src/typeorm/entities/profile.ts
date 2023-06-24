@@ -1,5 +1,7 @@
+
 import { Role } from "src/utils/roles";
-import { Entity,Column, PrimaryGeneratedColumn } from "typeorm";
+import { Entity,Column, PrimaryGeneratedColumn,ManyToOne, JoinColumn } from "typeorm";
+
 
 
 @Entity({name: 'user_profiles'})
@@ -25,4 +27,8 @@ export class Profile {
   
     @Column()
     role: Role;
+
+    
+
+    
 }

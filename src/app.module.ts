@@ -6,7 +6,10 @@ import { DataSource } from 'typeorm';
 import { User } from './typeorm/entities/user';
 import { UsersModule } from './users/users.module';
 import { Profile } from './typeorm/entities/profile';
-import { Posts } from './typeorm/entities/posts';
+import { CrudHistory } from './typeorm/entities/crudhistory';
+import { Products } from './typeorm/entities/products';
+import { ProductCategory } from './typeorm/entities/productcategory';
+import { Role } from './typeorm/entities/roles';
 
 
 @Module({
@@ -17,7 +20,7 @@ import { Posts } from './typeorm/entities/posts';
     username: 'root',
     password: 'rootuser',
     database: 'inventory_management',
-    entities: [User, Profile, Posts],
+    entities: [User, Profile,CrudHistory, Products, ProductCategory, Role],
     synchronize: true,
   }), UsersModule],
   controllers: [AppController],

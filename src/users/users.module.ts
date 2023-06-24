@@ -4,11 +4,13 @@ import { UsersService } from './services/users/users.service';
 import { User } from 'src/typeorm/entities/user';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Profile } from 'src/typeorm/entities/profile';
-import { Posts } from 'src/typeorm/entities/posts';
 import { UsersMiddleware } from './middleware/users/users.middleware';
+import { CrudHistory } from 'src/typeorm/entities/crudhistory';
+import { Products } from 'src/typeorm/entities/products';
+import { ProductCategory } from 'src/typeorm/entities/productcategory';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Profile, Posts])],
+  imports: [TypeOrmModule.forFeature([User, Profile,CrudHistory, Products, ProductCategory])],
   controllers: [UsersController],
   providers: [UsersService]
 })

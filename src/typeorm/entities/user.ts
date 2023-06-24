@@ -5,14 +5,13 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  OneToMany,
+  ManyToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  ViewColumn,
 } from 'typeorm';
 import { Profile } from './profile';
-import { Posts } from './posts';
+import { CrudHistory } from './crudhistory';
 
 @Entity({ name: 'users' })
 export class User extends BaseEntity {
@@ -36,12 +35,17 @@ export class User extends BaseEntity {
   @JoinColumn()
   profile: Profile
 
-  @OneToMany(()=> Posts, (post)=> post.user)
-  posts: Posts[]
+
+  @ManyToMany(()=> CrudHistory, (crudhistory)=> crudhistory.user)
+  crudhistories: CrudHistory[]
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column()
+  isDeleted : boolean
+
 }
