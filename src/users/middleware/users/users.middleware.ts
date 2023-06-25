@@ -4,7 +4,7 @@ import { NextFunction } from 'express';
 @Injectable()
 export class UsersMiddleware implements NestMiddleware {
   use(req: Response, res: Response, next: NextFunction) {
-    req["MIDDLEWARE"] = true;
+    req['MIDDLEWARE'] = true;
     next();
   }
 }

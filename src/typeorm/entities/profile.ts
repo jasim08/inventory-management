@@ -1,34 +1,26 @@
+import { Role } from 'src/utils/roles';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-import { Role } from "src/utils/roles";
-import { Entity,Column, PrimaryGeneratedColumn,ManyToOne, JoinColumn } from "typeorm";
-
-
-
-@Entity({name: 'user_profiles'})
+@Entity({ name: 'user_profiles' })
 export class Profile {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @PrimaryGeneratedColumn()
-    id: number;
+  @Column()
+  firstname: string;
 
-    @Column()
-    firstname:string;
+  @Column()
+  lastname: string;
 
-    @Column()
-    lastname:string;
+  @Column()
+  age: number;
 
-    @Column()
-    age: number;
+  @Column()
+  dob: string;
 
-    @Column()
-    dob: string;
+  @Column({ type: 'json', nullable: true })
+  additionalInfo: Record<string, any>;
 
-    @Column({type: "json", nullable: true })
-    additionalInfo: Record<string, any>
-  
-    @Column()
-    role: Role;
-
-    
-
-    
+  @Column()
+  role: Role;
 }

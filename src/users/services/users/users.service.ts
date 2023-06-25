@@ -3,16 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from 'express';
 import { Profile } from 'src/typeorm/entities/profile';
 import { User } from 'src/typeorm/entities/user';
-import { comparePasswords, encryptPassword } from 'src/utils/helper';
+import { comparePasswords } from 'src/utils/helper';
 import {
-  CreatePostParams,
   CreateUserParams,
   LoginParams,
   UpdateProfileparams,
   UpdateUserParams,
   createProfileParams,
 } from 'src/utils/type';
-import { Repository, FindOptionsWhere } from 'typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {

@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module , NestModule, RequestMethod} from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { UsersController } from './controller/users/users.controller';
 import { UsersService } from './services/users/users.service';
 import { User } from 'src/typeorm/entities/user';
@@ -11,22 +16,31 @@ import { ProductCategory } from 'src/typeorm/entities/productcategory';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Profile,CrudHistory, Products, ProductCategory])],
+  imports: [
+    TypeOrmModule.forFeature([
+      User,
+      Profile,
+      CrudHistory,
+      Products,
+      ProductCategory,
+    ]),
+  ],
   controllers: [UsersController],
-  providers: [UsersService,AuthGuard],
-  exports: [UsersService]
+  providers: [UsersService, AuthGuard],
+  exports: [UsersService],
 })
-export class UsersModule implements NestModule{
-  configure(consumer: MiddlewareConsumer){
+export class UsersModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
     // consumer.apply(UsersMiddleware).forRoutes('user')// for all user routes
-    consumer.apply(UsersMiddleware).forRoutes({
-      path: 'user',
-      method: RequestMethod.GET
-    },
-    {
-      path: 'user/:id',
-      method: RequestMethod.GET
-    }
+    consumer.apply(UsersMiddleware).forRoutes(
+      {
+        path: 'user',
+        method: RequestMethod.GET,
+      },
+      {
+        path: 'user/:id',
+        method: RequestMethod.GET,
+      },
     );
   }
 }

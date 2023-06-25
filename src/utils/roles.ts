@@ -1,6 +1,5 @@
-export enum Role{
-    superAdmin = 1,
-    staffMember = 2,
-    NormalUser = 3
+export enum Role {
+  superAdmin = 1,
+  staffMember = 2,
+  NormalUser = 3,
 }
-

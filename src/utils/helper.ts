@@ -1,8 +1,9 @@
 import * as bcrypt from 'bcrypt';
+const saltRounds = 10;
 
-const saltRounds = 10; // Number of salt rounds for bcrypt
-
-export const encryptPassword = async (plainPassword: string): Promise<string> => {
+export const encryptPassword = async (
+  plainPassword: string,
+): Promise<string> => {
   // Generate a salt
   const salt = await bcrypt.genSalt(saltRounds);
 
@@ -14,7 +15,7 @@ export const encryptPassword = async (plainPassword: string): Promise<string> =>
 
 export const comparePasswords = async (
   plainPassword: string,
-  hashedPassword: string
+  hashedPassword: string,
 ): Promise<boolean> => {
   // Compare the plain password with the hashed password
   const isMatch = await bcrypt.compare(plainPassword, hashedPassword);

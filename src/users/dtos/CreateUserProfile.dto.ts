@@ -1,11 +1,7 @@
-export class CreateUserProfileDto{
-
-    firstname : string;
-    lastname: string;
-    age: number;
-    dob:string;
-    additionalInfo: JSON;
-    
-
+export class CreateUserProfileDto {
+  firstname: string;
+  lastname: string;
+  age: number;
+  dob: string;
+  additionalInfo: JSON;
 }
-

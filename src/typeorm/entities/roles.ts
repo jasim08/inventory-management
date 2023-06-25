@@ -1,18 +1,13 @@
-
-import { BaseEntity, Entity,Column,OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Profile } from "./profile";
-
+import { BaseEntity, Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class Role extends BaseEntity{
+export class Role extends BaseEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-@PrimaryGeneratedColumn()
-id: number;
+  @Column()
+  role: string;
 
-@Column()
-role: String;
-
-@Column()
-roleDescription: String;
-    
+  @Column()
+  roleDescription: string;
 }

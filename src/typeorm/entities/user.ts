@@ -1,4 +1,3 @@
-
 import {
   BaseEntity,
   Column,
@@ -24,20 +23,18 @@ export class User extends BaseEntity {
   @Column()
   password: string;
 
-
-  @Column({nullable:true})
+  @Column({ nullable: true })
   authType: string;
 
   @Column({ nullable: true })
   authValue: string;
 
-  @OneToOne(()=> Profile)
+  @OneToOne(() => Profile)
   @JoinColumn()
-  profile: Profile
+  profile: Profile;
 
-
-  @ManyToMany(()=> CrudHistory, (crudhistory)=> crudhistory.user)
-  crudhistories: CrudHistory[]
+  @ManyToMany(() => CrudHistory, (crudhistory) => crudhistory.user)
+  crudhistories: CrudHistory[];
 
   @CreateDateColumn()
   createdAt: Date;
@@ -45,7 +42,6 @@ export class User extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({default: false})
-  isDeleted : boolean
-
+  @Column({ default: false })
+  isDeleted: boolean;
 }
