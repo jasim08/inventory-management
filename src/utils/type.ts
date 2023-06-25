@@ -41,3 +41,14 @@ export type UpdateProfileparams = {
   additionalInfo: Record<string, any> | null;
   role: Role;
 };
+
+export type createProductParams = {
+  productname: string;
+  productdescription: string;
+  categoryname: string;
+};
+
+export type UpdateProductParams = {
+  productname: string;
+  productdescription: string;
+};
