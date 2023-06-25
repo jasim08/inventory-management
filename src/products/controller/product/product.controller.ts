@@ -6,12 +6,18 @@ import {
   Post,
   Put,
   Delete,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
+import { AuthGuard } from 'src/auth/auth.guard';
 import {
   CreateproductDTO,
   UpdateProductDTO,
 } from 'src/products/dtos/products.dto';
 import { ProductService } from 'src/products/services/product/product.service';
+import { Roles } from 'src/utils/decorators/roles.decorator';
+import { Role } from 'src/utils/roles';
 
 @Controller('product')
 export class ProductController {
@@ -22,8 +28,13 @@ export class ProductController {
   }
 
   @Post()
-  createProducts(@Body() createProductDto: CreateproductDTO) {
-    return this.productService.createProducts(createProductDto);
+  @UseGuards(AuthGuard)
+  @Roles(Role.staffMember, Role.superAdmin)
+  createProducts(
+    @Req() req: Request,
+    @Body() createProductDto: CreateproductDTO,
+  ) {
+    return this.productService.createProducts(req, createProductDto);
   }
 
   @Put(':id')
@@ -35,7 +46,7 @@ export class ProductController {
   }
 
   @Delete(':id')
-  deleteProduct(@Param('id') id: number) {
+  deleteProduct(@Req() req: Request, @Param('id') id: number) {
     return this.productService.deleteProduct(id);
   }
 }
