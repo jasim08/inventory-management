@@ -5,14 +5,12 @@ import {
   Entity,
   JoinColumn,
   ManyToMany,
-  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Profile } from './profile';
 import { CrudHistory } from './crudhistory';
-import { Role } from './roles';
 
 @Entity({ name: 'users' })
 export class User extends BaseEntity {

@@ -7,12 +7,13 @@ import { ProductCategory } from 'src/typeorm/entities/productcategory';
 import { MailerService } from 'src/mail-service/mail-service.service';
 import { User } from 'src/typeorm/entities/user';
 import { CrudHistory } from 'src/typeorm/entities/crudhistory';
+import { CsvParser } from 'nest-csv-parser';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Products, ProductCategory, User, CrudHistory]),
   ],
   controllers: [ProductController],
-  providers: [ProductService, MailerService],
+  providers: [ProductService, MailerService, CsvParser],
 })
 export class ProductsModule {}

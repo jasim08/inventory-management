@@ -9,6 +9,8 @@ import { Request } from 'express';
 import { MailerService } from 'src/mail-service/mail-service.service';
 import { User } from 'src/typeorm/entities/user';
 import { CrudHistory } from 'src/typeorm/entities/crudhistory';
+import { createReadStream } from 'fs';
+import { CsvParser } from 'nest-csv-parser';
 
 @Injectable()
 export class ProductService {
@@ -20,6 +22,7 @@ export class ProductService {
     @InjectRepository(CrudHistory)
     private crudRepository: Repository<CrudHistory>,
     private sendMailService: MailerService,
+    private readonly csvParser: CsvParser,
   ) {}
   getProducts() {
     return this.productRepository.find({ relations: ['category'] });
@@ -70,11 +73,6 @@ export class ProductService {
         );
       }
 
-      // const template = fs.readFileSync(
-      //   path.join(__dirname, '..', '..', 'mailtemplate/request.hbs'),
-      //   'utf-8',
-      // );
-
       const superadmin = await this.userRepository.findOneBy({ roleId: 1 });
       const data = {
         sender_name: req['user']['username'],
@@ -98,5 +96,52 @@ export class ProductService {
 
   deleteProduct(id: number) {
     return this.productRepository.delete({ id });
+  }
+
+  async bulkUpload(
+    req: Request,
+    file: Express.Multer.File,
+  ): Promise<Products[]> {
+    console.log('file');
+    console.log(file);
+    const csvRows = await this.csvParser.parse(
+      createReadStream(file.path),
+      Products,
+    );
+
+    const products: Products[] = [];
+    // const rowsArray = csvRows.data;
+    console.log(csvRows.list.length);
+    for (const row of csvRows.list) {
+      const [productname, productdescription, category] =
+        row['productname,productdescritption,category'].split(',');
+      console.log(productname, productdescription, category);
+      const existingProduct = await this.productRepository
+        .createQueryBuilder('products')
+        .leftJoinAndSelect('products.category', 'product_category')
+        .where('products.productname = :productname', { productname })
+        .andWhere('product_category.category = :category', { category })
+        .getOne();
+
+      console.log('EXISTING');
+      console.log(existingProduct);
+      if (existingProduct) {
+        existingProduct.productdescription = productdescription;
+        products.push(existingProduct);
+      } else {
+        // Create a new product entity from the CSV row data
+        const newProduct = {
+          productdescription: productdescription,
+          productname: productname,
+        } as Products;
+
+        products.push(newProduct);
+      }
+    }
+
+    // Save all products (new and updated) in bulk
+    await this.productRepository.save(products);
+
+    return products;
   }
 }

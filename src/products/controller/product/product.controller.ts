@@ -8,9 +8,13 @@ import {
   Delete,
   Req,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 import {
   CreateproductDTO,
@@ -36,6 +40,36 @@ export class ProductController {
     @Body() createProductDto: CreateproductDTO,
   ) {
     return this.productService.createProducts(req, createProductDto);
+  }
+
+  @Post('/bulkUpload')
+  @UseGuards(AuthGuard)
+  @Roles(Role.staffMember, Role.superAdmin)
+  @UseInterceptors(
+    FileInterceptor('fileName', {
+      storage: diskStorage({
+        destination: '../uploads',
+        filename: (req, file, callback) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          callback(
+            null,
+            file.fieldname +
+              '-' +
+              uniqueSuffix +
+              '.' +
+              file.originalname.split('.').pop(),
+          );
+        },
+      }),
+    }),
+  )
+  createProductsviafile(
+    @Req() req: Request,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    console.log(file);
+    return this.productService.bulkUpload(req, file);
   }
 
   @Put(':id')

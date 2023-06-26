@@ -41,7 +41,7 @@ export class Products extends BaseEntity {
   @OneToMany(() => CrudHistory, (crud) => crud.product)
   curdhistory: CrudHistory[];
 
-  @ManyToOne(() => ProductCategory)
+  @ManyToOne(() => ProductCategory, (category) => category.products)
   @JoinColumn()
   category: ProductCategory;
 }
