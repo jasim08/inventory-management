@@ -10,11 +10,6 @@ import {
 
 import { User } from './user';
 import { Products } from './products';
-enum CRUDType {
-  DELETE = 'DELETE',
-  CREATE = 'CREATE',
-  UPDATE = 'UPDATE',
-}
 
 @Entity({ name: 'crudhistory' })
 export class CrudHistory extends BaseEntity {
@@ -22,14 +17,24 @@ export class CrudHistory extends BaseEntity {
   id: number;
 
   @Column()
-  type: CRUDType;
+  crudtype: string;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @ManyToOne(() => User)
   @JoinColumn()
-  user: User[];
+  raisedBy: User[];
+
+  @Column()
+  action: string;
+
+  @ManyToOne(() => User)
+  @JoinColumn()
+  actionBy: User[];
+
+  @Column({ default: false })
+  status: boolean;
 
   @ManyToOne(() => Products)
   @JoinColumn()

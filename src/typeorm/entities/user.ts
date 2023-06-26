@@ -5,12 +5,14 @@ import {
   Entity,
   JoinColumn,
   ManyToMany,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Profile } from './profile';
 import { CrudHistory } from './crudhistory';
+import { Role } from './roles';
 
 @Entity({ name: 'users' })
 export class User extends BaseEntity {
@@ -29,11 +31,14 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   authValue: string;
 
-  @OneToOne(() => Profile)
+  @Column({ nullable: true })
+  roleId: number;
+
+  @OneToOne(() => Profile, (profile) => profile.user)
   @JoinColumn()
   profile: Profile;
 
-  @ManyToMany(() => CrudHistory, (crudhistory) => crudhistory.user)
+  @ManyToMany(() => CrudHistory, (crudhistory) => crudhistory.raisedBy)
   crudhistories: CrudHistory[];
 
   @CreateDateColumn()

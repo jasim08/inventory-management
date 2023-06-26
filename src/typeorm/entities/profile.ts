@@ -1,7 +1,8 @@
 import { Role } from 'src/utils/roles';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from './user';
 
-@Entity({ name: 'user_profiles' })
+@Entity()
 export class Profile {
   @PrimaryGeneratedColumn()
   id: number;
@@ -23,4 +24,7 @@ export class Profile {
 
   @Column()
   role: Role;
+
+  @OneToOne(() => User, (user) => user.profile)
+  user: User;
 }

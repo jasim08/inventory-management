@@ -110,6 +110,12 @@ export class UsersService {
     if (!user) {
       throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
     }
+    if (updateProfileData && updateProfileData.role) {
+      await this.userRepository.update(
+        { id },
+        { roleId: updateProfileData.role },
+      );
+    }
     return this.profileRepository.update(
       { id: user.profile.id },
       { ...updateProfileData },
