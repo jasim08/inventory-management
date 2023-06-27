@@ -11,6 +11,8 @@ import {
   UseInterceptors,
   UploadedFile,
   Res,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -36,22 +38,12 @@ export class ProductController {
   @Post()
   @UseGuards(AuthGuard)
   @Roles(Role.staffMember, Role.superAdmin)
+  @UsePipes(new ValidationPipe())
   createProducts(
     @Req() req: Request,
     @Body() createProductDto: CreateproductDTO,
   ) {
     return this.productService.createProducts(req, createProductDto);
-  }
-
-  @Put('create/request/:reqid')
-  @UseGuards(AuthGuard)
-  @Roles(Role.superAdmin)
-  manageProductsWithRequestId(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Param('reqid') reqid: number,
-  ) {
-    this.productService.upadeProductWithRequestId(req, res, reqid);
   }
 
   @Post('/bulkUpload')
@@ -76,24 +68,39 @@ export class ProductController {
       }),
     }),
   )
+  @UsePipes(new ValidationPipe())
   createProductsviafile(
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log(file);
     return this.productService.bulkUpload(req, file);
   }
 
+  @UseGuards(AuthGuard)
+  @Roles(Role.superAdmin, Role.staffMember)
   @Put(':id')
+  @UsePipes(new ValidationPipe())
   updateProducts(
+    @Req() req: Request,
     @Param() id: number,
     @Body() updateProductDto: UpdateProductDTO,
   ) {
-    return this.productService.updateProduct(id, updateProductDto);
+    return this.productService.updateProduct(req, id, updateProductDto);
   }
 
   @Delete(':id')
   deleteProduct(@Req() req: Request, @Param('id') id: number) {
-    return this.productService.deleteProduct(id);
+    return this.productService.deleteProduct(req, id);
+  }
+
+  @Put('request/:reqid')
+  @UseGuards(AuthGuard)
+  @Roles(Role.superAdmin)
+  manageProductsWithRequestId(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Param('reqid') reqid: number,
+  ) {
+    this.productService.upadeProductWithRequestId(req, res, reqid);
   }
 }

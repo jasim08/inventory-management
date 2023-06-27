@@ -35,6 +35,6 @@ export class CrudHistory extends BaseEntity {
   @Column({ default: false })
   status: boolean;
 
-  @Column()
+  @Column({ nullable: true })
   productId: number;
 }

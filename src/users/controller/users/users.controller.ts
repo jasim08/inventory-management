@@ -10,16 +10,14 @@ import {
   UsePipes,
   ValidationPipe,
   Req,
-  Res,
   UseGuards,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CreatUserDto } from 'src/users/dtos/CreateUser.dto';
 import { CreateUserProfileDto } from 'src/users/dtos/CreateUserProfile.dto';
-import { UpdateUserDto } from 'src/users/dtos/UpdateUser.dto';
 import { UpdateUserProfileDto } from 'src/users/dtos/UpdateUserProfile.dto';
 import { UpdateRoleDTO } from 'src/users/dtos/updateRole.dto';
 import { updateUserPwdDTO } from 'src/users/dtos/updateUserPwd.dto';
@@ -34,8 +32,7 @@ export class UsersController {
   @Get()
   @UseGuards(AuthGuard)
   @Roles(Role.superAdmin)
-  async getUser(@Req() request: Request) {
-    console.log(request['MIDDLEWARE']);
+  async getUser() {
     return this.userService.findUser();
   }
 
@@ -76,7 +73,6 @@ export class UsersController {
     if (udpateUserPwdDTO && udpateUserPwdDTO['username']) {
       delete udpateUserPwdDTO['username'];
     }
-    console.log(udpateUserPwdDTO);
     if (udpateUserPwdDTO && udpateUserPwdDTO.password) {
       const encryptedPassword = udpateUserPwdDTO.password;
       const hashedPassword = await encryptPassword(encryptedPassword);

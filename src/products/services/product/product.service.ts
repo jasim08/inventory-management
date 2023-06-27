@@ -24,6 +24,7 @@ export class ProductService {
     private sendMailService: MailerService,
     private readonly csvParser: CsvParser,
   ) {}
+
   getProducts() {
     return this.productRepository.find({ relations: ['category'] });
   }
@@ -35,7 +36,6 @@ export class ProductService {
       let productcateogory = await this.categoryRepository.findOneBy({
         category: createProductParams.categoryname,
       });
-      console.log(productcateogory);
       if (!productcateogory) {
         const newCategory = this.categoryRepository.create({
           category: createProductParams.categoryname,
@@ -78,10 +78,11 @@ export class ProductService {
         sender_name: req['user']['username'],
         receiver_name: superadmin.username,
         buttonLink: 'http://localhost.com/request/' + crud.id,
+        requestType: 'CREATE',
       };
 
       this.sendMailService.sendMail(
-        'jasjasim08@gmail.com',
+        req['user']['username'],
         'Request for creating the Product.',
         data,
       );
@@ -90,20 +91,105 @@ export class ProductService {
     return { message: 'Request created successfull.' };
   }
 
-  async updateProduct(id: number, updateProductParams: UpdateProductParams) {
-    return this.productRepository.update({ id }, { ...updateProductParams });
+  async updateProduct(
+    req: Request,
+    id: number,
+    updateProductParams: UpdateProductParams,
+  ) {
+    if (req['user']['role'] == Role.superAdmin) {
+      const updated = await this.productRepository.update(
+        { id },
+        { ...updateProductParams },
+      );
+      if (updated) {
+        return { message: 'Product update successfull.' };
+      } else {
+        throw new HttpException(
+          'Some thing went wrong. Please try again Later',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    } else {
+      const newRequest = this.crudRepository.create({
+        crudtype: 'UPDATE',
+        status: false,
+        raisedBy: req['user']['sub'],
+        action: JSON.stringify(updateProductParams),
+      });
+
+      const crud = await this.crudRepository.save(newRequest);
+      if (!crud) {
+        throw new HttpException(
+          'Some thing went wrong. Please try again Later',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      const superadmin = await this.userRepository.findOneBy({ roleId: 1 });
+      const data = {
+        sender_name: req['user']['username'],
+        receiver_name: superadmin.username,
+        buttonLink: 'http://localhost.com/request/' + crud.id,
+        requestType: 'DELETE',
+      };
+
+      this.sendMailService.sendMail(
+        req['user']['username'],
+        'Request for UPDATE the Product.',
+        data,
+      );
+
+      return { message: 'Product update request created successfully.' };
+    }
   }
 
-  deleteProduct(id: number) {
-    return this.productRepository.delete({ id });
+  async deleteProduct(req: Request, id: number) {
+    if (req['user']['role'] == Role.superAdmin) {
+      const isDeleted = this.productRepository.delete({ id });
+      if (isDeleted) {
+        return { message: 'Product deleted successfully.' };
+      } else {
+        throw new HttpException(
+          'Some thing went wrong. Please try again Later',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    } else {
+      const newRequest = this.crudRepository.create({
+        crudtype: 'DELETE',
+        status: false,
+        raisedBy: req['user']['sub'],
+        action: JSON.stringify({ productId: id }),
+      });
+
+      const crud = await this.crudRepository.save(newRequest);
+      if (!crud) {
+        throw new HttpException(
+          'Some thing went wrong. Please try again Later',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      const superadmin = await this.userRepository.findOneBy({ roleId: 1 });
+      const data = {
+        sender_name: req['user']['username'],
+        receiver_name: superadmin.username,
+        buttonLink: 'http://localhost.com/request/' + crud.id,
+        requestType: 'DELETE',
+      };
+
+      this.sendMailService.sendMail(
+        req['user']['username'],
+        'Request for DELETE the Product.',
+        data,
+      );
+    }
   }
 
   async bulkUpload(
     req: Request,
     file: Express.Multer.File,
   ): Promise<Products[]> {
-    console.log('file');
-    console.log(file);
     const csvRows = await this.csvParser.parse(
       createReadStream(file.path),
       Products,
@@ -111,11 +197,10 @@ export class ProductService {
 
     const products: Products[] = [];
     // const rowsArray = csvRows.data;
-    console.log(csvRows.list.length);
+
     for (const row of csvRows.list) {
       const [productname, productdescription, category] =
         row['productname,productdescritption,category'].split(',');
-      console.log(productname, productdescription, category);
       const existingProduct = await this.productRepository
         .createQueryBuilder('products')
         .leftJoinAndSelect('products.category', 'product_category')
@@ -128,10 +213,19 @@ export class ProductService {
         products.push(existingProduct);
       } else {
         // Create a new product entity from the CSV row data
-        const newProduct = {
-          productdescription: productdescription,
-          productname: productname,
-        } as Products;
+        let categy = await this.categoryRepository.findOneBy({
+          category: category,
+        });
+        if (!categy) {
+          const newcategory = this.categoryRepository.create({
+            category,
+          });
+          categy = await this.categoryRepository.save(newcategory);
+        }
+        const newProduct = new Products();
+        newProduct.productname = productname;
+        newProduct.productdescription = productdescription;
+        newProduct.category = categy;
 
         products.push(newProduct);
       }
@@ -141,28 +235,59 @@ export class ProductService {
     return this.productRepository.save(products);
   }
 
+  async deleteProductWithReqeustId(id: number) {
+    const isDeleted = await this.productRepository.delete({ id });
+    if (isDeleted) {
+      return { message: 'product deleted successfull.' };
+    } else {
+      throw new HttpException(
+        'Something went wrong. Please try again later',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async upadeProductWithRequestId(req: Request, res: Response, id: number) {
     const actionrequest = await this.crudRepository.findOneBy({ id });
     if (!actionrequest) {
       throw new HttpException('Request not found.', HttpStatus.NOT_FOUND);
     }
+    if (actionrequest.crudtype == 'DELETE') {
+      const id = JSON.parse(actionrequest.action).productId;
+      return await this.deleteProductWithReqeustId(id);
+    } else {
+      const productDetails = JSON.parse(actionrequest.action);
 
-    const productDetails = JSON.parse(actionrequest.action);
-    console.log(productDetails);
-
-    let product = await this.productRepository.findOne({
-      where: { productname: productDetails.productname },
-      relations: ['category'],
-    });
-
-    console.log(product);
-    let result: any;
-    if (product) {
-      if (productDetails.categoryname == product.category.category) {
-        result = await this.productRepository.update(
-          { id: product.id },
-          { productdescription: productDetails.productdescription },
-        );
+      let product = await this.productRepository.findOne({
+        where: { productname: productDetails.productname },
+        relations: ['category'],
+      });
+      let result: any;
+      if (product) {
+        if (productDetails.categoryname == product.category.category) {
+          result = await this.productRepository.update(
+            { id: product.id },
+            { productdescription: productDetails.productdescription },
+          );
+        } else {
+          let category = await this.categoryRepository.findOneBy({
+            category: productDetails.categoryname,
+          });
+          if (!category) {
+            const newCategory = this.categoryRepository.create({
+              category: productDetails.categoryname,
+            });
+            category = await this.categoryRepository.save(newCategory);
+          }
+          const updateFiled = {
+            productdescription: productDetails.productdescription,
+            category: category,
+          };
+          result = this.productRepository.update(
+            { id: product.id },
+            updateFiled,
+          );
+        }
       } else {
         let category = await this.categoryRepository.findOneBy({
           category: productDetails.categoryname,
@@ -173,61 +298,43 @@ export class ProductService {
           });
           category = await this.categoryRepository.save(newCategory);
         }
-        const updateFiled = {
+        const createField = {
+          productname: productDetails.productname,
           productdescription: productDetails.productdescription,
           category: category,
         };
-        result = this.productRepository.update({ id: product.id }, updateFiled);
-        console.log(result);
+        const newproduct = this.productRepository.create(createField);
+        product = await this.productRepository.save(newproduct);
+        if (product) {
+          result = product;
+        }
       }
-    } else {
-      let category = await this.categoryRepository.findOneBy({
-        category: productDetails.categoryname,
-      });
-      if (!category) {
-        const newCategory = this.categoryRepository.create({
-          category: productDetails.categoryname,
-        });
-        category = await this.categoryRepository.save(newCategory);
-      }
-      const createField = {
-        productname: productDetails.productname,
-        productdescription: productDetails.productdescription,
-        category: category,
-      };
-      const newproduct = this.productRepository.create(createField);
-      product = await this.productRepository.save(newproduct);
-      if (product) {
-        result = product;
-      }
-      console.log(result);
-    }
 
-    if (result) {
-      const update = await this.crudRepository.update(
-        { id },
-        {
-          status: true,
-          actionBy: req['user']['sub'],
-          productId: product.id,
-        },
-      );
-      if (update) {
-        console.log('UPDATEW', update);
-        res.send({
-          message: `Product created with this request Id ${id} was successfull.`,
-        });
+      if (result) {
+        const update = await this.crudRepository.update(
+          { id },
+          {
+            status: true,
+            actionBy: req['user']['sub'],
+            productId: product.id,
+          },
+        );
+        if (update) {
+          res.send({
+            message: `Product ${actionrequest.crudtype} with this request Id ${id} was successfull.`,
+          });
+        } else {
+          throw new HttpException(
+            'Something went wrong. Please try again later',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
       } else {
         throw new HttpException(
           'Something went wrong. Please try again later',
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
-    } else {
-      throw new HttpException(
-        'Something went wrong. Please try again later',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
     }
   }
 }

@@ -1,4 +1,3 @@
-import { Role } from 'src/utils/roles';
 import { Entity, Column, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from './user';
 

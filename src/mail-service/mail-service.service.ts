@@ -24,15 +24,17 @@ export class MailerService {
     const html = compiledTemplate(data);
     // const html = ejs.render(template, data);
 
-    console.log(html);
     const mail = {
       from: 'jas@sandboxeca74afc414a418992aee25947606a73.mailgun.org',
       to,
       subject,
       html,
     };
-    await this.mailgunClient.messages().send(mail);
-    console.log('Email sent:', mail);
-    return data;
+    try {
+      await this.mailgunClient.messages().send(mail);
+      return data;
+    } catch (e) {
+      return { message: e.message, statusCode: e.statusCode };
+    }
   }
 }

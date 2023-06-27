@@ -10,7 +10,6 @@ import {
   LoginParams,
   UpdateProfileparams,
   UpdatePwdParams,
-  UpdateRole,
   UpdateUserParams,
   createProfileParams,
 } from 'src/utils/type';
@@ -23,8 +22,14 @@ export class UsersService {
     @InjectRepository(Profile) private profileRepository: Repository<Profile>,
   ) {}
 
-  findUser() {
-    return this.userRepository.find({ relations: ['profile'] });
+  async findUser() {
+    const getalluser = await this.userRepository.find({
+      relations: ['profile'],
+    });
+    return getalluser.map((x) => {
+      delete x.password;
+      return x;
+    });
   }
 
   async getUserById(id: number) {
@@ -121,7 +126,6 @@ export class UsersService {
       where: { id },
       relations: ['profile'],
     });
-    console.log(user);
     if (!user) {
       throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
     }
@@ -152,8 +156,6 @@ export class UsersService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    console.log('profieldata');
-    console.log(profiledata);
     let profile: Profile;
     let result: any;
     if (!user.profile) {

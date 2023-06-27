@@ -16,7 +16,6 @@ export class AuthService {
   ) {}
 
   async signIn(username: string, pass: string): Promise<any> {
-    console.log(username, pass);
     const user = await this.userService.getUserByUsername(username);
 
     if (!user) {
