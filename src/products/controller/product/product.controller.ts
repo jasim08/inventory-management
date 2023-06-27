@@ -10,8 +10,9 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  Res,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -40,6 +41,17 @@ export class ProductController {
     @Body() createProductDto: CreateproductDTO,
   ) {
     return this.productService.createProducts(req, createProductDto);
+  }
+
+  @Put('create/request/:reqid')
+  @UseGuards(AuthGuard)
+  @Roles(Role.superAdmin)
+  manageProductsWithRequestId(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Param('reqid') reqid: number,
+  ) {
+    this.productService.upadeProductWithRequestId(req, res, reqid);
   }
 
   @Post('/bulkUpload')

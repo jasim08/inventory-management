@@ -7,23 +7,20 @@ export class Profile {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   firstname: string;
 
-  @Column()
+  @Column({ nullable: true })
   lastname: string;
 
-  @Column()
+  @Column({ nullable: true })
   age: number;
 
-  @Column()
+  @Column({ nullable: true })
   dob: string;
 
   @Column({ type: 'json', nullable: true })
   additionalInfo: Record<string, any>;
-
-  @Column()
-  role: Role;
 
   @OneToOne(() => User, (user) => user.profile)
   user: User;

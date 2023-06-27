@@ -1,5 +1,14 @@
-import { Controller, HttpStatus, HttpCode, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  HttpStatus,
+  HttpCode,
+  Post,
+  Body,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { signInDTO } from './dtos/signIndto';
 
 @Controller('auth')
 export class AuthController {
@@ -7,7 +16,8 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  signIn(@Body() signInDto: Record<string, any>) {
+  @UsePipes(new ValidationPipe())
+  signIn(@Body() signInDto: signInDTO) {
     return this.authService.signIn(signInDto.username, signInDto.password);
   }
 }

@@ -4,22 +4,14 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  OneToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { CrudHistory } from './crudhistory';
 import { ProductCategory } from './productcategory';
 
 @Entity()
 export class Products extends BaseEntity {
-  // id
-  // productname
-  // productdescription
-  // isdeleted: boolean
-  // categoryId
-
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -37,9 +29,6 @@ export class Products extends BaseEntity {
 
   @Column({ default: false })
   isDeleted: boolean;
-
-  @OneToMany(() => CrudHistory, (crud) => crud.product)
-  curdhistory: CrudHistory[];
 
   @ManyToOne(() => ProductCategory, (category) => category.products)
   @JoinColumn()

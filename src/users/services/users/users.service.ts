@@ -4,10 +4,13 @@ import { Response } from 'express';
 import { Profile } from 'src/typeorm/entities/profile';
 import { User } from 'src/typeorm/entities/user';
 import { comparePasswords } from 'src/utils/helper';
+import { Role } from 'src/utils/roles';
 import {
   CreateUserParams,
   LoginParams,
   UpdateProfileparams,
+  UpdatePwdParams,
+  UpdateRole,
   UpdateUserParams,
   createProfileParams,
 } from 'src/utils/type';
@@ -55,9 +58,14 @@ export class UsersService {
     }
     const newUser = this.userRepository.create({
       ...userDetails,
+      roleId: Role.NormalUser,
       createdAt: new Date(),
     });
     return this.userRepository.save(newUser);
+  }
+
+  updateUserPwd(id: number, updatePwdDetails: UpdatePwdParams) {
+    return this.userRepository.update({ id }, { ...updatePwdDetails });
   }
 
   updateUser(id: number, updateUserDetails: UpdateUserParams) {
@@ -102,23 +110,71 @@ export class UsersService {
     }
   }
 
-  async updateProfile(id: number, updateProfileData: UpdateProfileparams) {
+  async updateRole(req: Express.Request, id: number, updateRole: Role) {
+    if (id == Role.superAdmin) {
+      throw new HttpException(
+        'You can not update this role to staff members.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['profile'],
+    });
+    console.log(user);
+    if (!user) {
+      throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
+    }
+
+    const result = await this.userRepository.update(
+      { id },
+      { roleId: updateRole },
+    );
+
+    if (result) {
+      return { message: 'Role update successfully.' };
+    } else {
+      throw new HttpException(
+        'Something went wrong. Please try again later.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateProfile(id: number, profiledata: UpdateProfileparams) {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['profile'],
     });
     if (!user) {
-      throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
-    }
-    if (updateProfileData && updateProfileData.role) {
-      await this.userRepository.update(
-        { id },
-        { roleId: updateProfileData.role },
+      throw new HttpException(
+        'User not found, Cannot update your Profile.',
+        HttpStatus.BAD_REQUEST,
       );
     }
-    return this.profileRepository.update(
-      { id: user.profile.id },
-      { ...updateProfileData },
-    );
+    console.log('profieldata');
+    console.log(profiledata);
+    let profile: Profile;
+    let result: any;
+    if (!user.profile) {
+      const newprofile = this.profileRepository.create({ ...profiledata });
+      profile = await this.profileRepository.save(newprofile);
+      user.profile = profile;
+      result = await this.userRepository.save(user);
+    } else {
+      result = await this.profileRepository.update(
+        { id: user.profile.id },
+        { ...profiledata },
+      );
+    }
+
+    if (result) {
+      return { message: 'User profile update successfully.' };
+    } else {
+      throw new HttpException(
+        'Something went wrong. Please try again later.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

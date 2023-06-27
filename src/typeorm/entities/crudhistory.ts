@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 
 import { User } from './user';
-import { Products } from './products';
 
 @Entity({ name: 'crudhistory' })
 export class CrudHistory extends BaseEntity {
@@ -36,7 +35,6 @@ export class CrudHistory extends BaseEntity {
   @Column({ default: false })
   status: boolean;
 
-  @ManyToOne(() => Products)
-  @JoinColumn()
-  product: Products[];
+  @Column()
+  productId: number;
 }

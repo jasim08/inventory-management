@@ -7,7 +7,6 @@ import {
 import { UsersService } from 'src/users/services/users/users.service';
 import { comparePasswords } from 'src/utils/helper';
 import { JwtService } from '@nestjs/jwt';
-import { Role } from 'src/utils/roles';
 
 @Injectable()
 export class AuthService {
@@ -27,11 +26,11 @@ export class AuthService {
 
     const isMatch = await comparePasswords(plainPassword, user.password);
     if (isMatch) {
-      let userRole = Role.NormalUser;
-      if (user && user.profile && user.profile.role) {
-        userRole = user.profile.role;
-      }
-      const payload = { sub: user.id, username: user.username, role: userRole };
+      const payload = {
+        sub: user.id,
+        username: user.username,
+        role: user.roleId,
+      };
       return {
         message: 'Login successfull!.',
         access_token: await this.jwtService.signAsync(payload),

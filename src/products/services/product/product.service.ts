@@ -5,7 +5,7 @@ import { Products } from 'src/typeorm/entities/products';
 import { UpdateProductParams, createProductParams } from 'src/utils/type';
 import { Repository } from 'typeorm';
 import { Role } from 'src/utils/roles';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { MailerService } from 'src/mail-service/mail-service.service';
 import { User } from 'src/typeorm/entities/user';
 import { CrudHistory } from 'src/typeorm/entities/crudhistory';
@@ -123,8 +123,6 @@ export class ProductService {
         .andWhere('product_category.category = :category', { category })
         .getOne();
 
-      console.log('EXISTING');
-      console.log(existingProduct);
       if (existingProduct) {
         existingProduct.productdescription = productdescription;
         products.push(existingProduct);
@@ -140,8 +138,96 @@ export class ProductService {
     }
 
     // Save all products (new and updated) in bulk
-    await this.productRepository.save(products);
+    return this.productRepository.save(products);
+  }
 
-    return products;
+  async upadeProductWithRequestId(req: Request, res: Response, id: number) {
+    const actionrequest = await this.crudRepository.findOneBy({ id });
+    if (!actionrequest) {
+      throw new HttpException('Request not found.', HttpStatus.NOT_FOUND);
+    }
+
+    const productDetails = JSON.parse(actionrequest.action);
+    console.log(productDetails);
+
+    let product = await this.productRepository.findOne({
+      where: { productname: productDetails.productname },
+      relations: ['category'],
+    });
+
+    console.log(product);
+    let result: any;
+    if (product) {
+      if (productDetails.categoryname == product.category.category) {
+        result = await this.productRepository.update(
+          { id: product.id },
+          { productdescription: productDetails.productdescription },
+        );
+      } else {
+        let category = await this.categoryRepository.findOneBy({
+          category: productDetails.categoryname,
+        });
+        if (!category) {
+          const newCategory = this.categoryRepository.create({
+            category: productDetails.categoryname,
+          });
+          category = await this.categoryRepository.save(newCategory);
+        }
+        const updateFiled = {
+          productdescription: productDetails.productdescription,
+          category: category,
+        };
+        result = this.productRepository.update({ id: product.id }, updateFiled);
+        console.log(result);
+      }
+    } else {
+      let category = await this.categoryRepository.findOneBy({
+        category: productDetails.categoryname,
+      });
+      if (!category) {
+        const newCategory = this.categoryRepository.create({
+          category: productDetails.categoryname,
+        });
+        category = await this.categoryRepository.save(newCategory);
+      }
+      const createField = {
+        productname: productDetails.productname,
+        productdescription: productDetails.productdescription,
+        category: category,
+      };
+      const newproduct = this.productRepository.create(createField);
+      product = await this.productRepository.save(newproduct);
+      if (product) {
+        result = product;
+      }
+      console.log(result);
+    }
+
+    if (result) {
+      const update = await this.crudRepository.update(
+        { id },
+        {
+          status: true,
+          actionBy: req['user']['sub'],
+          productId: product.id,
+        },
+      );
+      if (update) {
+        console.log('UPDATEW', update);
+        res.send({
+          message: `Product created with this request Id ${id} was successfull.`,
+        });
+      } else {
+        throw new HttpException(
+          'Something went wrong. Please try again later',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    } else {
+      throw new HttpException(
+        'Something went wrong. Please try again later',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

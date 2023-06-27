@@ -8,12 +8,14 @@ export type CreateUserParams = {
 };
 
 export type UpdateUserParams = {
-  username: string;
   password: string;
   authType: string;
   authValue: string;
 };
 
+export type UpdatePwdParams = {
+  password: string;
+};
 export type createProfileParams = {
   firstname: string;
   lastname: string;
@@ -34,6 +36,14 @@ export type LoginParams = {
 };
 
 export type UpdateProfileparams = {
+  firstname: string;
+  lastname: string;
+  age: number;
+  dob: string;
+  additionalInfo: Record<string, any> | null;
+};
+
+export type UpdateRole = {
   firstname: string;
   lastname: string;
   age: number;
