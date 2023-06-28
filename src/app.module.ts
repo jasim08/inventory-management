@@ -11,27 +11,47 @@ import { ProductCategory } from './typeorm/entities/productcategory';
 import { Role } from './typeorm/entities/roles';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: getEnvFilePath(),
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'rootuser',
-      database: 'inventory_management',
+      host: process.env.DBHOST,
+      port: Number(process.env.DBPORT),
+      username: process.env.DBUNAME,
+      password: process.env.DBPASS,
+      database: process.env.DBNAME,
       entities: [User, Profile, CrudHistory, Products, ProductCategory, Role],
-      synchronize: true,
+      synchronize: false,
     }),
     UsersModule,
     AuthModule,
     ProductsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ConfigService],
+  exports: [ConfigService],
 })
 export class AppModule {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
+}
+
+function getEnvFilePath(): string {
+  // Determine the environment based on the NODE_ENV environment variable
+  const nodeEnv = process.env.NODE_ENV || 'development';
+
+  // Return the appropriate dotenv file path
+  if (nodeEnv === 'production') {
+    return '.env.prod';
+  } else if (nodeEnv === 'test') {
+    return '.env.test';
+  } else {
+    return '.env.dev';
+  }
 }

@@ -3,14 +3,15 @@ import * as mailgun from 'mailgun-js';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
+
 @Injectable()
 export class MailerService {
   private mailgunClient: mailgun.Mailgun;
 
   constructor() {
     this.mailgunClient = mailgun({
-      apiKey: '3ae1226e1d26833c24467f92a38769c1-135a8d32-937b78ee',
-      domain: 'sandboxeca74afc414a418992aee25947606a73.mailgun.org',
+      apiKey: process.env.MAILKEY,
+      domain: process.env.DOMAIN,
     });
   }
 
